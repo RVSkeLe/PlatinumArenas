@@ -6,10 +6,7 @@ import com.strangeone101.platinumarenas.commands.DebugCommand;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.TileState;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.command.CommandSender;
@@ -18,14 +15,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.DataFormatException;
 
@@ -50,6 +40,7 @@ public class Arena {
     private List<Section> sections = new ArrayList<>();
 
     private Map<String, ArenaProperty> properties = new HashMap<>();
+    private Set<Pair<Integer, Integer>> cachedChunks;
 
     Arena(String name, Location corner1, Location corner2) { //package level access
         this.name = name;
@@ -135,6 +126,7 @@ public class Arena {
     public void reset(int resetSpeed, CommandSender sender, boolean silent) {
         if (getSections().size() == 0) return;
 
+        forceLoadArenaChunks();
 
         ResetLoopinData data = new ResetLoopinData();
         data.maxBlocksThisTick = resetSpeed;
@@ -161,6 +153,7 @@ public class Arena {
      */
     private void loopyReset(ResetLoopinData data, CommandSender sender) {
         if (cancelReset) {
+            releaseArenaChunks();
             this.currentReset = null;
             cancelReset = false;
 
@@ -231,6 +224,7 @@ public class Arena {
         data.calculateMicroseconds += System.nanoTime() - t;
 
         if (data.sections.size() == 0) {
+            releaseArenaChunks();
             this.currentReset = null;
 
             double resetMs = (double)(data.resetMicroseconds / 1000) / 1000;
@@ -802,6 +796,44 @@ public class Arena {
         return location.getX() >= corner1.getX() && location.getX() <= corner2.getX() &&
                 location.getY() >= corner1.getY() && location.getY() <= corner2.getY() &&
                 location.getZ() >= corner1.getZ() && location.getZ() <= corner2.getZ();
+    }
+
+    private void forceLoadArenaChunks() {
+        World world = corner1.getWorld();
+
+        for (Pair<Integer, Integer> pair : getTouchedChunkCoords()) {
+            Chunk chunk = world.getChunkAt(pair.getLeft(), pair.getRight());
+            chunk.addPluginChunkTicket(PlatinumArenas.INSTANCE);
+        }
+    }
+
+    private void releaseArenaChunks() {
+        World world = corner1.getWorld();
+
+        for (Pair<Integer, Integer> pair : getTouchedChunkCoords()) {
+            Chunk chunk = world.getChunkAt(pair.getLeft(), pair.getRight());
+            chunk.removePluginChunkTicket(PlatinumArenas.INSTANCE);
+        }
+    }
+
+    public Set<Pair<Integer, Integer>> getTouchedChunkCoords() {
+        if (cachedChunks != null) return cachedChunks;
+
+        Set<Pair<Integer, Integer>> chunks = new HashSet<>();
+
+        int minChunkX = corner1.getBlockX() >> 4;
+        int maxChunkX = corner2.getBlockX() >> 4;
+        int minChunkZ = corner1.getBlockZ() >> 4;
+        int maxChunkZ = corner2.getBlockZ() >> 4;
+
+        for (int cx = minChunkX; cx <= maxChunkX; cx++) {
+            for (int cz = minChunkZ; cz <= maxChunkZ; cz++) {
+                chunks.add(Pair.of(cx, cz));
+            }
+        }
+
+        cachedChunks = chunks;
+        return cachedChunks;
     }
 
     @Override
