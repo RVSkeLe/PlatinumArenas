@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.strangeone101</groupId>
         <artifactId>platinumarenas</artifactId>
-        <version>0.8.0</version>
+        <version>0.8.1-PRE</version>
     </parent>
     <version>latest</version>
     <artifactId>platinumarenas-common</artifactId>
@@ -18,7 +18,7 @@
         <!-- Paper Repo -->
         <repository>
             <id>papermc</id>
-            <url>https://papermc.io/repo/repository/maven-public/</url>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
     </repositories>
 
@@ -27,7 +27,7 @@
         <dependency>
             <groupId>io.papermc</groupId>
             <artifactId>paperlib</artifactId>
-            <version>1.0.1</version>
+            <version>1.0.8</version>
         </dependency>
         <!-- Spigot API -->
         <dependency>

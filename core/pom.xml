@@ -18,7 +18,7 @@
         </repository>
         <repository>
             <id>enginehub-maven</id>
-            <url>http://maven.enginehub.org/repo/</url>
+            <url>https://maven.enginehub.org/repo/</url>
         </repository>
         <repository>
             <id>minecraft-repo</id>
@@ -26,7 +26,7 @@
         </repository>
         <repository>
             <id>papermc</id>
-            <url>https://papermc.io/repo/repository/maven-public/</url>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
     </repositories>
     <!--<scm>
@@ -148,7 +148,7 @@
         <dependency>
             <groupId>com.sk89q.worldedit</groupId>
             <artifactId>worldedit-bukkit</artifactId>
-            <version>7.2.15-SNAPSHOT</version>
+            <version>7.3.16</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
